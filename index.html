@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B787 Systems Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; color: #2d3a5a; min-height: 100vh; }
+
+  header {
+    background: #fff;
+    padding: 14px 24px;
+    border-bottom: 2px solid #dce8ff;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 2px 8px rgba(100,130,200,0.08);
+  }
+  .logo { font-size: 26px; }
+  header h1 { font-size: 18px; color: #3a5ab0; font-weight: 700; letter-spacing: 0.5px; }
+  header p { font-size: 12px; color: #8899bb; }
+
+  .system-nav {
+    background: #fff;
+    padding: 12px 20px;
+    border-bottom: 1px solid #dce8ff;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: thin;
+    scrollbar-color: #c0d0f0 #fff;
+  }
+  .system-nav::-webkit-scrollbar { height: 4px; }
+  .system-nav::-webkit-scrollbar-thumb { background: #c0d0f0; border-radius: 2px; }
+
+  .sys-btn {
+    display: inline-block;
+    padding: 7px 15px;
+    margin-right: 6px;
+    border-radius: 20px;
+    border: 1.5px solid #c8d8f4;
+    background: #f4f8ff;
+    color: #6680bb;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .sys-btn:hover { background: #e4eeff; border-color: #9ab8ee; color: #3a5ab0; }
+  .sys-btn.active { background: #4a7aee; color: #fff; border-color: #4a7aee; font-weight: 600; box-shadow: 0 2px 8px rgba(74,122,238,0.25); }
+
+  .main { padding: 24px 20px; max-width: 760px; margin: 0 auto; }
+
+  .sys-title {
+    font-size: 17px; font-weight: 700; color: #3a5ab0;
+    margin-bottom: 20px; padding-bottom: 10px;
+    border-bottom: 2px solid #dce8ff;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sys-title .count { font-size: 13px; font-weight: 500; color: #7a99cc; }
+
+  .question-card {
+    background: #fff;
+    border: 1.5px solid #e0eaff;
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px rgba(100,130,200,0.06);
+    transition: box-shadow 0.2s;
+  }
+  .question-card:hover { box-shadow: 0 4px 16px rgba(100,130,200,0.1); }
+
+  .q-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  }
+  .q-num-badge {
+    background: #e8f0ff; color: #4a7aee;
+    font-size: 12px; font-weight: 700;
+    padding: 3px 10px; border-radius: 12px;
+    white-space: nowrap;
+  }
+  .q-text {
+    font-size: 15px; line-height: 1.7; color: #2d3a5a; font-weight: 500;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+
+  .opt-btn {
+    padding: 12px 16px;
+    background: #f8faff;
+    border: 1.5px solid #dce8ff;
+    border-radius: 10px;
+    color: #4a5a80;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: left;
+    transition: all 0.15s;
+    line-height: 1.5;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .opt-btn:hover:not(:disabled) { background: #eef4ff; border-color: #9ab8ee; color: #2d3a5a; }
+  .opt-label { font-weight: 700; color: #9ab8ee; min-width: 18px; }
+  .opt-btn:hover:not(:disabled) .opt-label { color: #4a7aee; }
+
+  .opt-btn.correct {
+    background: #edfbf3; border-color: #5ecb8a; color: #2a7a4a;
+    box-shadow: 0 2px 8px rgba(80,200,120,0.15);
+  }
+  .opt-btn.correct .opt-label { color: #5ecb8a; }
+  .opt-btn.correct::after { content: ' ✓'; font-weight: 700; color: #5ecb8a; margin-left: auto; padding-left: 8px; }
+
+  .opt-btn.wrong {
+    background: #fff2f2; border-color: #f4a0a0; color: #b04040;
+  }
+  .opt-btn.wrong .opt-label { color: #f4a0a0; }
+  .opt-btn.wrong::after { content: ' ✗'; font-weight: 700; color: #f4a0a0; margin-left: auto; padding-left: 8px; }
+
+  .opt-btn.reveal {
+    background: #edfbf3; border-color: #5ecb8a; color: #2a7a4a; opacity: 0.6;
+  }
+  .opt-btn.reveal .opt-label { color: #5ecb8a; }
+  .opt-btn:disabled { cursor: default; }
+
+  .feedback {
+    margin-top: 12px; padding: 12px 16px; border-radius: 10px;
+    font-size: 13px; line-height: 1.6; display: none;
+    border: 1.5px solid #c8eedd;
+    background: #f0fbf5; color: #2a6a44;
+  }
+  .feedback.show { display: block; }
+  .feedback .exp-text { color: #4a7a60; margin-top: 4px; }
+
+  .empty-state {
+    text-align: center; padding: 80px 20px; color: #99aacc;
+  }
+  .empty-state .icon { font-size: 52px; margin-bottom: 14px; }
+  .empty-state p { font-size: 16px; color: #aabbd8; }
+  .empty-state small { font-size: 13px; color: #c0cce8; display: block; margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">✈️</div>
+  <div>
+    <h1>B787 SYSTEMS QUIZ</h1>
+    <p>Type Rating Study</p>
+  </div>
+</header>
+
+<div class="system-nav" id="sysNav"></div>
+
+<div class="main" id="mainArea">
+  <div class="empty-state">
+    <div class="icon">📋</div>
+    <p>시스템을 선택하여 문제를 시작하세요</p>
+    <small>상단 버튼에서 학습할 시스템을 클릭하세요</small>
+  </div>
+</div>
+
+<script>
+const ALL_QUESTIONS = {
+  "1. Airplane General": [
+    {
+      q: "B787-9의 180° 선회를 위한 최소 포장 도로 폭은?",
+      opts: ["140ft (42.7m)", "154ft (47m)", "165ft (50.3m)", "176ft (53.8m)"],
+      ans: 1,
+      exp: "B787-9 최소 180° 선회 포장 도로 폭은 154ft (47m)입니다. B787-10은 176ft 7in (53.8m)입니다."
+    },
+    {
+      q: "비상등(Emergency Lighting) ARMED 위치의 기능은?",
+      opts: [
+        "모든 비상등 수동으로만 점등",
+        "항공기 전원 차단 시 비상등 자동 점등",
+        "플로어 비상등만 자동 점등",
+        "완충 배터리 최소 5분 작동"
+      ],
+      ans: 1,
+      exp: "ARMED: 항공기 전원 실패 또는 차단 시 모든 비상등 자동 점등. 완충 배터리는 최소 10분간 작동합니다."
+    },
+    {
+      q: "Halon 소화기를 비행 갑판에서 방출 전 모든 승무원이 먼저 해야 할 것은?",
+      opts: [
+        "즉시 산소마스크 착용 후 EMERGENCY 100% 선택",
+        "창문을 열어 환기시킨다",
+        "Fire Suppression Switch를 ON한다",
+        "APU를 시동한다"
+      ],
+      ans: 0,
+      exp: "비행 갑판에서 Halon 소화기 방출 전, 모든 승무원은 산소마스크를 착용하고 EMERGENCY 100% 산소를 선택해야 합니다."
+    },
+    {
+      q: "승객 산소마스크가 자동으로 PSU에서 떨어지는 기준은?",
+      opts: [
+        "13,000ft 또는 출발/도착 공항 고도 + 1,000ft 중 높은 값",
+        "14,500ft 또는 출발/도착 공항 고도 + 1,500ft 중 높은 값",
+        "14,000ft 또는 출발/도착 공항 고도 + 1,000ft 중 높은 값",
+        "13,500ft 또는 출발/도착 공항 고도 + 2,000ft 중 높은 값"
+      ],
+      ans: 1,
+      exp: "마스크는 14,500ft / 출발 공항 고도 + 1,500ft / 도착 공항 고도 + 1,500ft 중 높은 값에 도달하기 전 자동 낙하. 산소 공급 약 60분."
+    },
+    {
+      q: "ELT가 조난 신호를 송신하지 않는 주파수는?",
+      opts: ["121.5 MHz", "243 MHz", "325 MHz", "406 MHz"],
+      ans: 2,
+      exp: "ELT는 121.5 MHz, 243 MHz, 406 MHz로 송신합니다. 325 MHz는 ELT 주파수가 아닙니다."
+    },
+    {
+      q: "비상 접근 코드를 올바르게 입력했을 때 나타나는 현상은?",
+      opts: [
+        "EICAS 주의 메시지와 키패드 적색 등 점등",
+        "EICAS FD DOOR AUTO UNLOCK 경고 메시지와 키패드 황색 등 점등",
+        "EICAS 권고 메시지와 키패드 녹색 등 점등",
+        "조종실 차임 소리만 발생"
+      ],
+      ans: 1,
+      exp: "올바른 비상 접근 코드 입력 시: EICAS 경고 'FD DOOR AUTO UNLOCK' 및 키패드 황색 등 점등."
+    },
+    {
+      q: "Nose gear landing lights가 점등되지 않는 경우는?",
+      opts: [
+        "Nose landing gear is down",
+        "Nose landing gear lever is not down",
+        "Nose landing gear is down and locked",
+        "Nose landing gear is not down and locked"
+      ],
+      ans: 3,
+      exp: "기수 착륙등은 Nose landing gear가 down and locked 상태가 아닐 때 점등되지 않습니다."
+    },
+    {
+      q: "Smoke Detector 색상별 현상 중 맞는 것은?",
+      opts: [
+        "Steady green – 연기 감지됨",
+        "Blinking green – 정비 필요",
+        "Steady red – 감지기 고장",
+        "Blinking red – 전원 정상"
+      ],
+      ans: 1,
+      exp: "Steady green: 전원 정상 & 작동 중. Blinking green: 정비 필요. Steady red: 연기 감지. Blinking red: 감지기 고장."
+    },
+    {
+      q: "화물 도어 취급 시 조작 금지 풍속과 개방 금지 풍속은?",
+      opts: [
+        "25노트 초과 조작 금지 / 50노트 초과 개방 금지",
+        "40노트 초과 조작 금지 / 65노트 초과 개방 금지",
+        "35노트 초과 조작 금지 / 60노트 초과 개방 금지",
+        "30노트 초과 조작 금지 / 55노트 초과 개방 금지"
+      ],
+      ans: 1,
+      exp: "도어 방향 바람 40노트 초과 시 조작 금지. 돌풍 65노트 초과 시 도어 개방 금지."
+    },
+    {
+      q: "B787 최대 Tiller 조향 각도(Maximum Steering Angle)는?",
+      opts: ["60°", "70°", "80°", "90°"],
+      ans: 1,
+      exp: "Tiller로 좌우 각각 최대 70°까지 조향 가능. 러더 페달로는 좌우 각각 최대 8°."
+    },
+    {
+      q: "정상 전원 상실 시 승객 출입문 창문(Electronically Dimmable Window)은?",
+      opts: ["자동으로 어두워진다", "자동으로 투명해진다", "수동으로만 변경 가능", "변화 없음"],
+      ans: 1,
+      exp: "정상 전원 차단 시 도어 창문은 자동으로 투명(clear)해집니다. 최대 1분 소요될 수 있습니다."
+    },
+    {
+      q: "Cabin entry door가 Automatic mode(Armed)임을 확인하는 방법은?",
+      opts: [
+        "모드 선택 레버가 GREEN 밴드 위 + 자동 표시등 점등",
+        "모드 선택 레버가 RED 밴드 위 + 자동 표시등 깜박임",
+        "모드 선택 레버가 RED 밴드에 완전히 위치 + 자동 표시등 점등(깜박이지 않음)",
+        "모드 선택 레버가 GREEN 밴드 위 + 도어 표시등 점등"
+      ],
+      ans: 2,
+      exp: "Automatic mode: 모드 선택 레버가 RED 밴드에 완전히 위치, 자동 표시등이 점등(깜박이지 않음)."
+    },
+    {
+      q: "Towing Battery Charge Light – LOW의 의미는?",
+      opts: ["최소 60분 남음", "최소 30분 남음", "최소 15분 남음", "최소 5분 남음"],
+      ans: 2,
+      exp: "HIGH: 최소 60분, MEDIUM: 최소 30분, LOW: 최소 15분 (정상 견인 기준)."
+    },
+    {
+      q: "SEAT BELT SIGNS 스위치 AUTO 시 자동 점등되는 조건이 아닌 것은?",
+      opts: [
+        "착륙 장치 미수납 및 미잠금",
+        "플랩 레버 5 이상",
+        "객실 고도 8,000ft 초과",
+        "객실 고도 10,000ft 초과"
+      ],
+      ans: 2,
+      exp: "AUTO 자동 점등: 기어 미수납/미잠금 / 플랩 레버 5 이상 / 항공기 고도 항공사 설정 고도 미만 / 객실 고도 10,000ft 초과 / 승객 산소 ON. '8,000ft'는 해당 없음."
+    },
+    {
+      q: "비상등 시스템 배터리에 대한 설명으로 맞는 것은?",
+      opts: [
+        "중앙 배터리 하나로 모든 비상등 공급",
+        "항공기 전기 시스템으로 충전 유지, 완충 시 최소 10분 작동",
+        "비상등 전용 AC 배터리 사용",
+        "완충 배터리는 정확히 10분 작동"
+      ],
+      ans: 1,
+      exp: "비상등 시스템은 원격 배터리로 작동하며, 항공기 전기 시스템으로 충전을 유지합니다. 완충된 배터리는 최소 10분간 작동합니다."
+    }
+  ],
+
+  "2. Air Systems": [
+    {
+      q: "ALTN 황색 등 점등 시 Forward/Aft Outflow Valve가 자동 재위치되는 고도는?",
+      opts: [
+        "10,000ft 미만 및 지상이 아닐 때",
+        "13,000ft 미만 및 지상이 아닐 때",
+        "14,000ft 미만 및 지상이 아닐 때",
+        "20,000ft 미만 및 지상이 아닐 때"
+      ],
+      ans: 1,
+      exp: "13,000ft 미만 및 지상이 아닐 때 전방 OFV → 10시, 후방 OFV → 1시 방향으로 자동 재위치."
+    },
+    {
+      q: "FMC에서 순항 고도 사용 불가 시 기본(default) 순항 고도는?",
+      opts: ["42,000ft", "42,100ft", "43,000ft", "43,100ft"],
+      ans: 2,
+      exp: "FMC 순항 고도 미사용 시 기본값: 43,000ft."
+    },
+    {
+      q: "정상 순항 객실 고도와 저하 운영 시 최대 객실 고도는?",
+      opts: ["5,000ft / 7,000ft", "6,000ft / 8,000ft", "5,000ft / 8,000ft", "6,000ft / 7,000ft"],
+      ans: 1,
+      exp: "정상 순항 시 6,000ft 이하, 일부 저하 운영 시 최대 8,000ft."
+    },
+    {
+      q: "착륙 고도 FMC 미사용/MAN 미설정 시 EICAS 메시지와 가정 착륙 고도는?",
+      opts: [
+        "CABIN ALTITUDE / 2,000ft",
+        "LANDING ALTITUDE / 1,000ft",
+        "CABIN ALTITUDE / 1,000ft",
+        "LANDING ALTITUDE / 2,000ft"
+      ],
+      ans: 3,
+      exp: "EICAS 권고 LANDING ALTITUDE 표시, 객실 고도 컨트롤러는 착륙 고도 2,000ft 가정."
+    },
+    {
+      q: "TRIM AIR 스위치 FAULT (amber) 점등 조건이 아닌 것은?",
+      opts: [
+        "Trim air valve가 closed 상태로 고장",
+        "Zone supply duct 과열로 valve가 closed 명령됨",
+        "Trim air valve가 open 명령됨",
+        "TRIM AIR 스위치가 OFF로 선택됨"
+      ],
+      ans: 2,
+      exp: "FAULT amber: valve closed 고장 / zone 과열로 closed 명령 / TRIM AIR 스위치 OFF. 'Valve open 명령'은 FAULT 조건이 아닙니다."
+    },
+    {
+      q: "AIR COND RESET 스위치 PUSH 시 잘못된 설명은?",
+      opts: [
+        "공조 결함 리셋 및 정상 작동 재시도",
+        "과열/제어 실패/밸브 고장으로 닫힌 Trim air valve 리셋",
+        "고장난 재순환 팬 리셋 시도",
+        "결함 보호 리셋"
+      ],
+      ans: 1,
+      exp: "AIR COND RESET은 과열 등으로 '닫힌(closed)' trim air valve를 리셋합니다. 'held open'이 아닙니다."
+    },
+    {
+      q: "Humidification System 자동 작동 조건은?",
+      opts: [
+        "순항 20분 후 20,000ft 이상 / 착륙 2시간 전 차단",
+        "순항 20분 후 25,000ft 이상 / 착륙 1~1.5시간 전 차단",
+        "순항 20분 후 28,000ft 이상 / 착륙 1.5시간 전 차단",
+        "순항 20분 후 30,000ft 이상 / 착륙 2~2.5시간 전 차단"
+      ],
+      ans: 1,
+      exp: "HUMID 스위치 ON 시, 25,000ft 이상 순항 20분 후 자동 작동 / 착륙 약 1~1.5시간 전 자동 차단."
+    },
+    {
+      q: "Pressurization System Automatic Operation – 이륙 전 특징은?",
+      opts: [
+        "이륙 전 약간의 부(negative) 여압 공급",
+        "이륙 전 약간의 정(positive) 여압 공급",
+        "이륙 전 여압 없음",
+        "Rotation 시 여압 시작"
+      ],
+      ans: 1,
+      exp: "이륙 시 Rotation 전 약간의 정(positive) 여압 공급으로 객실 고도 상승 스케줄로 부드러운 전환을 제공합니다."
+    },
+    {
+      q: "Pressurization System에 대한 설명 중 잘못된 것은?",
+      opts: [
+        "객실 가압은 Outflow Valve를 통한 배출 조절로 제어",
+        "Outflow Valve는 전방 1개, 후방 1개 설치",
+        "두 Outflow Valve는 기체 과다 압력차로부터 보호",
+        "정상 시 두 Outflow Valve로 균등하게 배출"
+      ],
+      ans: 2,
+      exp: "기체를 과다 압력차로부터 보호하는 것은 Positive/Negative Pressure Relief Valve/Vent입니다. Outflow Valve는 두 개(전방, 후방)로 정상 시 균등 배출하며, 각각 단독으로 전체 환기율을 유지할 수 있습니다."
+    },
+    {
+      q: "LDG ALT Selector를 Pull ON 후 천천히 돌리면 변화 증분은?",
+      opts: [
+        "10ft 증분",
+        "100ft 증분",
+        "300ft 증분",
+        "500ft 증분"
+      ],
+      ans: 1,
+      exp: "천천히 돌리면 100ft 증분, 빠르게 돌리면 500ft 증분. 설정 후 EICAS에 착륙 고도 및 MAN 표시."
+    },
+    {
+      q: "Equipment Cooling System 결함 후 비임계 전자 장비 고장이 예상되는 시간은?",
+      opts: ["15분 후", "30분 후", "45분 후", "60분 후"],
+      ans: 1,
+      exp: "Aft equipment cooling 불능 시: 비임계 전자 장비 30분 후 고장 가능, 임계 전자 장비 345분 후 고장 가능."
+    }
+  ],
+
+  "3. Anti-Ice, Rain": [
+    {
+      q: "자동 결빙 감지가 지상에서 억제되는 속도는?",
+      opts: ["60노트 이하", "75노트 이하", "80노트 이하", "100노트 이하"],
+      ans: 1,
+      exp: "자동 결빙 감지는 지상 75노트 미만에서 억제됩니다."
+    },
+    {
+      q: "Engine Anti-Ice 밸브 자동 닫힘 조건이 아닌 것은?",
+      opts: [
+        "시동 중",
+        "블리드 공기 과압",
+        "엔진 화재 스위치 당김",
+        "윙 방빙 활성화 시"
+      ],
+      ans: 3,
+      exp: "EAI 밸브 자동 닫힘: 시동 중 / 블리드 과온 / 블리드 과압 / 엔진 화재 스위치 당김 / 블리드 누출 감지. 윙 방빙과는 무관합니다."
+    },
+    {
+      q: "Wing Anti-Ice 수동(ON) 모드에서 전원 공급 조건은?",
+      opts: ["TAT 0°C 미만", "TAT 10°C 미만", "TAT 15°C 미만", "TAT 25°C 미만"],
+      ans: 3,
+      exp: "비행 중 WING ANTI-ICE 선택기 ON 시, TAT 25°C 미만이면 항상 전원 공급됩니다."
+    },
+    {
+      q: "Wing Anti-Ice 시스템 – 잘못된 설명은?",
+      opts: [
+        "비대칭 결빙 방지를 위해 좌우 대칭 작동",
+        "블리드 공기로 앞전 슬랫을 가열 (pneumatic)",
+        "한쪽 열매트 고장 시 반대쪽 자동 차단",
+        "지상 75노트 이하에서 억제"
+      ],
+      ans: 1,
+      exp: "Wing Anti-Ice는 전기식(electric) 열매트로 앞전 슬랫을 가열합니다. 블리드 공기(pneumatic) 방식이 아닙니다."
+    },
+    {
+      q: "ANTI-ICE ON 권고 메시지가 표시되는 조건은?",
+      opts: [
+        "Anti-ice 선택기 ON + TAT > 10°C + 결빙 미감지",
+        "Anti-ice 선택기 ON + TAT < 10°C + 결빙 감지됨",
+        "Anti-ice 선택기 OFF + TAT < 10°C + 결빙 감지됨",
+        "Anti-ice 선택기 ON + TAT > 0°C + 결빙 감지됨"
+      ],
+      ans: 0,
+      exp: "ANTI-ICE ON Advisory: Anti-ice 선택기 ON + TAT 10°C 초과 + 결빙 미감지. 세 조건 모두 충족 시."
+    },
+    {
+      q: "WING ANTI-ICE AUTO – Stick shaker logic이 icing conditions으로 설정되는 조건은?",
+      opts: [
+        "Flaps out of up + 결빙 감지 + TAT 0°C 이하",
+        "Flaps up + 결빙 감지 + OAT 10°C 이하",
+        "Flaps out of up + 결빙 감지 + TAT 10°C 이하",
+        "Flaps up + 결빙 감지 + TAT 0°C 이하"
+      ],
+      ans: 2,
+      exp: "AUTO 모드: Flaps out of up + 결빙 조건 감지 + TAT 10°C 이하 시 stick shaker logic이 icing conditions으로 설정됩니다."
+    },
+    {
+      q: "Pack Inlet Anti-Ice System 억제 조건은?",
+      opts: [
+        "비행 중 / TAT > 0°C",
+        "지상 / TAT > 10°C",
+        "지상 / TAT > 15°C",
+        "비행 중 / TAT > 10°C"
+      ],
+      ans: 1,
+      exp: "팩 흡입구 방빙은 지상과 TAT > 10°C 조건 모두에서 억제됩니다."
+    },
+    {
+      q: "자동 결빙 감지 시스템 – 기존 Boeing 기종과의 가장 큰 차이는?",
+      opts: [
+        "결빙 자체를 직접 감지",
+        "Ice 대신 액체 수분량(LWC)과 TAT를 이용해 결빙 예측",
+        "지상에서도 항상 작동",
+        "조종사 수동 입력 필요"
+      ],
+      ans: 1,
+      exp: "B787의 자동 결빙 감지 시스템은 얼음을 직접 감지하지 않고, 액체 수분량(LWC)과 TAT 등 대기 데이터를 분석해 결빙 조건을 예측합니다."
+    }
+  ],
+
+  "4. Automatic Flight": [
+    {
+      q: "자동 착륙 중 FLARE 모드 활성화 고도는?",
+      opts: [
+        "Radio Altitude 100~80ft",
+        "Radio Altitude 60~40ft",
+        "Radio Altitude 80~60ft",
+        "Radio Altitude 40~20ft"
+      ],
+      ans: 1,
+      exp: "FLARE는 60~40ft RA에서 활성화. 자동추력은 25~50ft RA에서 스로틀을 idle로 후퇴시킵니다."
+    },
+    {
+      q: "Autothrottle 자동 해제 조건 – 항상 해제가 아닌 것은?",
+      opts: [
+        "현재 자동추력 모드 결함",
+        "역추력 레버 reverse idle 이상",
+        "수동 착륙 중 idle 후퇴 시작 후 강제 스로틀 이동",
+        "한쪽 엔진 정지 시"
+      ],
+      ans: 3,
+      exp: "한쪽 엔진 정지 시 A/T 해제는 'may(될 수 있음)'입니다. 양쪽 엔진 정지 시에는 반드시 해제됩니다."
+    },
+    {
+      q: "IAN(Integrated Approach Navigation) – 맞는 설명은?",
+      opts: [
+        "자동 착륙(Autoland)을 지원한다",
+        "100ft RA 이하에서 반드시 수동 조종 전환",
+        "ILS와 동일한 편차 스케일 사용",
+        "FAF 이전 고도 제한 미적용"
+      ],
+      ans: 1,
+      exp: "IAN은 Autoland 미지원. 100ft RA 이하에서 반드시 수동 조종으로 전환해야 합니다."
+    },
+    {
+      q: "Stall 보호를 위해 자동추력이 자동 활성화되지 않는 피치 모드는?",
+      opts: ["VNAV PTH", "FLCH SPD 또는 TOGA", "G/S", "V/S"],
+      ans: 1,
+      exp: "피치 모드 FLCH SPD 또는 TOGA 시 A/T는 실속 보호를 위해 자동 활성화되지 않습니다. A/T 모드 HOLD 시도 마찬가지."
+    },
+    {
+      q: "Approach mode 해제 조건이 아닌 것은?",
+      opts: [
+        "Radio altitude 1,500ft 초과 시 APP 버튼 재선택",
+        "LOC 캡처 & G/S Armed 상태에서 HDG SEL 선택",
+        "롤/피치 모드 캡처 후 TO/GA 선택",
+        "Radio altitude 500ft 이하에서 APP 버튼 재선택"
+      ],
+      ans: 3,
+      exp: "Approach mode는 1,500ft RA 초과 시 APP 재선택으로 해제됩니다. 500ft 이하에서는 APP 재선택으로 해제되지 않습니다."
+    },
+    {
+      q: "AFDS Status Annunciation – LAND 2와 LAND 3의 차이는?",
+      opts: [
+        "LAND 2: Fail Operational / LAND 3: Fail Passive",
+        "LAND 2: Fail Passive / LAND 3: Fail Operational",
+        "LAND 2: No Autoland / LAND 3: Fail Passive",
+        "LAND 2: Single 채널 / LAND 3: Dual 채널"
+      ],
+      ans: 1,
+      exp: "LAND 2 (Fail Passive): 단일 결함이 비행 경로에서 심각한 편차 유발 불가. LAND 3 (Fail Operational): 단일 결함이 자동 착륙 수행을 막을 수 없는 이중화 수준."
+    }
+  ],
+
+  "5. Communications": [
+    {
+      q: "VHF/HF 라디오 30초 이상 송신 시 나타나는 EICAS 메시지는?",
+      opts: [
+        "STUCK MIC CAPT, F/O, OBS (Caution)",
+        "RADIO TRANSMIT CAPT, F/O, OBS (Advisory)",
+        "RADIO TRANSMIT CAPT, F/O, OBS (Caution)",
+        "STUCK MIC CAPT, F/O, OBS (Advisory)"
+      ],
+      ans: 1,
+      exp: "30초 초과 송신 시 EICAS Advisory: RADIO TRANSMIT CAPT, F/O, OBS. 지상에서는 약 35초 후 자동 비활성화."
+    },
+    {
+      q: "CVR을 삭제(Erase)하는 방법은?",
+      opts: [
+        "지상 엔진 정지 상태에서 2초간 눌러 유지",
+        "지상 엔진 가동 상태에서 5초간 눌러 유지",
+        "지상 엔진 정지 상태에서 1회 누름",
+        "비행 중 2초간 눌러 유지"
+      ],
+      ans: 0,
+      exp: "CVR ERASE: 지상 + 엔진 정지 + 2초간 유지. CVR TEST: 지상 + 엔진 정지 + 3초간 유지."
+    },
+    {
+      q: "VHF 라디오를 121.5 MHz로 튜닝하면 발생하는 것은?",
+      opts: [
+        "해당 조종사만 자동 모니터링",
+        "모든 승무원이 자동 모니터링, 모든 ACP 수신등 점등",
+        "EICAS 권고 메시지 표시",
+        "다른 라디오가 자동으로 OFF됨"
+      ],
+      ans: 1,
+      exp: "121.5 MHz 튜닝 시: 모든 승무원 자동 모니터링, 모든 ACP 수신등 점등."
+    },
+    {
+      q: "HF 안테나 튜닝 실패를 나타내는 음조 지속 시간은?",
+      opts: ["3초 이상", "5초 이상", "7초 이상", "10초 이상"],
+      ans: 2,
+      exp: "7초 이상 지속되는 음조는 시스템 튜닝 실패를 나타냅니다. 최근 100개 튜닝 주파수가 메모리에 저장됩니다."
+    },
+    {
+      q: "CAB 송신 선택 스위치를 1초 이내에 두 번 누르면?",
+      opts: [
+        "PA 방송이 시작된다",
+        "항공사 지정 위치로 우선 호출(Priority call)이 발생한다",
+        "인터폰이 차단된다",
+        "SATCOM 연결이 시작된다"
+      ],
+      ans: 1,
+      exp: "CAB 선택 스위치를 1초 이내에 두 번 누르면 항공사 지정 위치로 우선 호출이 발생합니다. 통화 중인 경우 연결이 전환됩니다."
+    },
+    {
+      q: "VHF 페이지 2, 3, 4에 저장 가능한 주파수는?",
+      opts: [
+        "라디오당 4개 (총 12개)",
+        "3개 라디오에 총 24개",
+        "라디오당 8개 (총 24개) — 3개 라디오에 대해 페이지당 8개",
+        "라디오당 10개 (총 30개)"
+      ],
+      ans: 1,
+      exp: "VHF 페이지 2, 3, 4에는 3개 라디오에 대해 총 24개(페이지당 8개)의 저장 주파수를 포함할 수 있습니다."
+    }
+  ],
+
+  "6. Electrical": [
+    {
+      q: "배터리 전원 CCS 시동 시 Left CCR 온라인 확인 방법은?",
+      opts: [
+        "하부 DU에 기본 포맷 표시",
+        "모든 디스플레이와 HUD에 기본 포맷 표시",
+        "기장 Inboard 및 하부 DU에 기본 포맷(CDU 페이지) 표시",
+        "부기장 Inboard 및 Outboard DU에 기본 포맷 표시"
+      ],
+      ans: 2,
+      exp: "Left CCR 온라인: 기장의 inboard 및 하부 DU에 기본 포맷(CDU 페이지) 표시. 시동 약 2~3분 소요."
+    },
+    {
+      q: "전기 부하 차단(Load Shedding) 시스템 목록이 표시되는 곳은?",
+      opts: [
+        "Electrical Synoptic",
+        "개별 EICAS 메시지 패널",
+        "ECL 비정상 체크리스트",
+        "개별 장비 Synoptic"
+      ],
+      ans: 0,
+      exp: "Electrical synoptic에 부하 차단 영향을 받는 시스템 목록 표시. Air/Fuel/Hydraulic synoptic에도 억제/차단 장비 표시됩니다."
+    },
+    {
+      q: "APU 배터리 전원으로 APU 시동 시 사용되는 스타터/발전기는?",
+      opts: [
+        "좌측 또는 우측 중 하나",
+        "좌우 양쪽 모두",
+        "우측 스타터/발전기",
+        "좌측 스타터/발전기"
+      ],
+      ans: 2,
+      exp: "APU 배터리 전원 시동(엔진 미작동, 전방 외부 전원 없음): 우측 스타터/발전기 항상 사용."
+    },
+    {
+      q: "B787 전기 전력원 수가 맞는 것은?",
+      opts: [
+        "엔진 VFSG 3개, APU SG 2개, 외부 리셉터클 2개",
+        "엔진 VFSG 4개, APU SG 2개, 외부 리셉터클 3개",
+        "엔진 VFSG 4개, APU SG 2개, 외부 리셉터클 2개",
+        "엔진 VFSG 2개, APU SG 2개, 외부 리셉터클 3개"
+      ],
+      ans: 1,
+      exp: "VFSG 4개(엔진) + APU SG 2개 + 외부 AC 리셉터클 3개 + RAT 1개 + 메인 배터리 1개 + APU 배터리 1개 + 비행 제어 PMG 3개 + EEC PMA 2개."
+    },
+    {
+      q: "MAIN BATTERY DISCH 권고 메시지가 표시되는 조건은?",
+      opts: [
+        "메인 배터리 방전 중 또는 Hot battery bus 전원 미공급",
+        "APU 배터리 방전 중",
+        "양쪽 배터리 모두 방전 중",
+        "배터리 전압 최소값 미만"
+      ],
+      ans: 0,
+      exp: "MAIN BATTERY DISCH Advisory: 메인 배터리 방전 중 또는 Hot battery bus 전원 미공급 시."
+    },
+    {
+      q: "Towing Power 모드에서 전원이 공급되지 않는 것은?",
+      opts: [
+        "기장 ACP",
+        "항법등",
+        "무선 통신 시스템",
+        "브레이크"
+      ],
+      ans: 2,
+      exp: "Towing Power 모드에서 무선 통신 시스템은 전원 공급 안 됨. 기장 ACP, 비행 인터폰, 조종실 돔 조명, 통로 스탠드 조명, 항법등, 브레이크는 공급됩니다."
+    },
+    {
+      q: "비행 제어 전자 장치의 주 전원(PMG)은 몇 개인가?",
+      opts: ["2개", "3개", "4개", "6개"],
+      ans: 1,
+      exp: "3개의 Permanent Magnet Generator(PMG)가 비행 제어 전자 장치의 주 전원입니다. 주 전기 시스템과 독립적이며 서로 독립적으로 작동합니다."
+    },
+    {
+      q: "Ground Power로 엔진 시동 시 최소 필요 외부 전원은?",
+      opts: [
+        "전방 리셉터클 1개 (90 kVA)", 
+        "전방 리셉터클 2개 (각 90 kVA 이상)",
+        "전방 1개 + 후방 1개",
+        "전방 2개 + 후방 1개"
+      ],
+      ans: 1,
+      exp: "APU 불사용 시 지상 전원 엔진 시동: 최소 90 kVA 등급의 전방 외부 전원 2개 필요. 2개의 VFSG를 사용해 APU 시동보다 시간이 더 걸립니다."
+    }
+  ],
+
+  "7. Engines, APU": [
+    {
+      q: "지상 자동 시동 중단(abort) 조건이 아닌 것은?",
+      opts: [
+        "두 스타터 모두 상실",
+        "N1 회전 없음",
+        "오일 압력 상승 없음",
+        "시동 중 EGT가 기준값 도달"
+      ],
+      ans: 3,
+      exp: "지상 Autostart 중단 조건: 두 스타터 손실 / N1 미회전 / 오일 압력 미상승. EGT 기준값 도달은 비행 중 시동에서만 일시 중단 조건입니다."
+    },
+    {
+      q: "Auto-Relight 활성화 조건은?",
+      opts: [
+        "비행 중 엔진이 idle 이상일 때",
+        "FUEL CONTROL 스위치 CUTOFF 시",
+        "FUEL CONTROL 스위치 RUN + 엔진 idle 이하",
+        "엔진 화재 스위치 당김 시"
+      ],
+      ans: 2,
+      exp: "Auto-Relight: FUEL CONTROL RUN + 엔진 idle 이하 시 지상/비행 중 모두 활성화. 화염 소멸 또는 롤백 감지 시 두 점화기 모두 작동."
+    },
+    {
+      q: "In-flight Start Envelope 표시 조건은?",
+      opts: [
+        "엔진 비작동 + 화재 스위치 당긴 상태",
+        "화재 스위치 IN + FUEL CONTROL CUTOFF 또는 N2 idle 미만",
+        "N2 idle 미만 + 화재 스위치 당긴 상태",
+        "두 엔진 모두 비작동"
+      ],
+      ans: 1,
+      exp: "비행 중 시동 포락선: 화재 스위치 IN + (FUEL CONTROL CUTOFF 또는 N2 idle 미만) 시 Magenta로 표시됩니다."
+    },
+    {
+      q: "APU에 대한 설명 중 맞는 것은?",
+      opts: [
+        "APU 작동 시 EICAS 메시지 없음",
+        "냉각 기간 중 APU 작동 복귀 불가",
+        "비행 중 엔진 발전기 3개 이상 오프라인 시 자동 시동",
+        "APU LIMIT 메시지 후 수동 차단 시 2분 냉각 있음"
+      ],
+      ans: 2,
+      exp: "비행 중 엔진 발전기 3개 이상 오프라인 → APU 선택기 위치 무관 자동 시동. APU RUNNING 메모 표시(95% 속도 +2초). 냉각 2분 중 ON 복귀 가능. APU LIMIT 후 차단 시 냉각 없음."
+    },
+    {
+      q: "EEC Idle 종류가 아닌 것은?",
+      opts: ["Minimum Idle", "Approach Idle", "Ice Idle (Icing Idle)", "Reverse Idle"],
+      ans: 3,
+      exp: "EEC Idle: Minimum (지상/대부분 비행) / Approach (플랩 25+ 또는 기어 DOWN) / Icing (엔진 방빙 ON). Reverse Idle은 EEC idle 모드가 아닙니다."
+    },
+    {
+      q: "Secondary engine indication이 자동 표시되지 않는 조건은?",
+      opts: [
+        "디스플레이에 처음 전원 공급 시",
+        "비행 중 FUEL CONTROL CUTOFF",
+        "지상에서 N2 RPM idle 미만",
+        "2차 엔진 변수 초과"
+      ],
+      ans: 2,
+      exp: "자동 표시 조건: 처음 전원 공급 / 비행 중 CUTOFF / 비행 중 엔진 화재 스위치 당김 / 변수 초과 / 비행 중 N2 idle 미만 / START 위치 / FUEL FLOW ENG. '지상에서 N2 idle 미만'은 자동 표시 조건이 아닙니다."
+    },
+    {
+      q: "엔진 화재 경고 시 나타나는 현상이 아닌 것은?",
+      opts: [
+        "화재 벨 소리",
+        "Master WARNING 등 점등",
+        "EICAS 경고 FIRE ENG 표시",
+        "EICAS Advisory DET FIRE ENG 표시"
+      ],
+      ans: 3,
+      exp: "FIRE ENG 경고: 화재 벨 / Master WARNING / EICAS 경고 FIRE ENG / 화재 스위치 경고등 / 화재 스위치 잠금 해제 / FUEL CONTROL 화재등. DET FIRE ENG Advisory는 화재 감지 시스템 고장 시 표시됩니다."
+    },
+    {
+      q: "Reverser 시스템 활성화 시 REV 표시 색상은?",
+      opts: [
+        "전환 중: 녹색 / 완전 전개 시: 황색",
+        "전환 중: 황색 / 완전 전개 시: 녹색",
+        "항상 녹색",
+        "항상 황색"
+      ],
+      ans: 1,
+      exp: "REV 표시: 전환(transit) 중 황색, 완전 전개 시 녹색. 각 N1 표시 위에 표시됩니다."
+    }
+  ],
+
+  "8. Fire Protection": [
+    {
+      q: "엔진 화재 스위치 자동 잠금 해제 조건은?",
+      opts: [
+        "화재 경고 또는 FUEL CONTROL CUTOFF 시",
+        "항상 수동 잠금 해제",
+        "지상 APU 작동 중",
+        "AUTOSTART 스위치 ON 시"
+      ],
+      ans: 0,
+      exp: "엔진 화재 스위치 자동 잠금 해제: 화재 경고 발생 시 또는 FUEL CONTROL 스위치 CUTOFF 시."
+    },
+    {
+      q: "비행 중 화물칸 화재 경보 시 소화기 작동 순서는?",
+      opts: [
+        "즉시 2개 병 전량 방출 → 15분 후 나머지 저유량 방출",
+        "즉시 3개 병 전량 방출 → 10분 후 나머지 저유량 방출",
+        "즉시 1개 병 방출 → 10분 후 나머지 전량 방출",
+        "즉시 4개 병 전량 방출 → 10분 후 나머지 저유량 방출"
+      ],
+      ans: 0,
+      exp: "비행 중: 즉시 2개 병 전량 → 15분 후 나머지 저유량. 15분 내 착륙 시: 착륙 시 1개 병 저유량. 지상 스위치 누름: 3개 병 동시 방출(3번째 저유량)."
+    },
+    {
+      q: "Main Wheel Well 화재 보호 시스템에 대한 맞는 설명은?",
+      opts: [
+        "화재 감지 및 소화 시스템 모두 있음",
+        "화재 및 과열 감지 있음, 소화 시스템 없음",
+        "소화 시스템 있음, 화재 감지 없음",
+        "화재/과열 감지 및 소화 시스템 모두 없음"
+      ],
+      ans: 1,
+      exp: "Main Wheel Well: 화재 및 과열 감지 있음, 소화 시스템 없음. Nose Wheel Well: 화재/과열 감지 시스템 없음."
+    },
+    {
+      q: "APU 화재 소화병(Extinguisher Bottle) 수는?",
+      opts: ["1개", "2개", "3개", "4개"],
+      ans: 0,
+      exp: "APU 소화기는 1개. 화재 신호 → APU 즉시 차단 → 연료 밸브 닫힘 15초 지연 후 자동 방출."
+    },
+    {
+      q: "엔진 과열 주의(Overheat Caution) 시 나타나는 현상이 아닌 것은?",
+      opts: [
+        "주의 비퍼 소리",
+        "Master CAUTION 등 점등",
+        "화재 벨 소리",
+        "EICAS 주의 OVERHEAT ENG 표시"
+      ],
+      ans: 2,
+      exp: "Overheat Caution: 비퍼 / Master CAUTION / EICAS 주의 OVERHEAT ENG. 화재 벨은 FIRE ENG 경고 시에만 울립니다."
+    },
+    {
+      q: "엔진에 설치된 화재 소화병(Extinguisher Bottle) 수와 사용 방법은?",
+      opts: [
+        "엔진당 1개, 해당 엔진에만 방출",
+        "총 2개, 어느 한 병을 어느 엔진에도 방출 가능",
+        "엔진당 2개, 해당 엔진에만 방출",
+        "총 4개, 각 엔진에 2개씩"
+      ],
+      ans: 1,
+      exp: "화재 소화병 총 2개. 두 병 모두 어느 엔진에도 방출 가능합니다."
+    },
+    {
+      q: "FIRE TEST PASS 경고 메시지가 표시되는 시기는?",
+      opts: [
+        "수동 테스트 시작 시",
+        "자동 테스트 시작 시",
+        "자동 테스트 완료 시",
+        "수동 테스트 완료 시"
+      ],
+      ans: 3,
+      exp: "테스트 완료 시 FIRE TEST IN PROG 메시지가 FIRE TEST PASS 또는 FIRE TEST FAIL로 대체됩니다."
+    }
+  ],
+
+  "9. Flight Controls": [
+    {
+      q: "모든 유압 전력 상실 시 피치 제어에 사용되는 것은?",
+      opts: [
+        "유압 작동 스태빌라이저와 스포일러 2쌍",
+        "전기 작동 스태빌라이저와 스포일러 2쌍",
+        "전기 작동 스태빌라이저만",
+        "유압 작동 스태빌라이저만"
+      ],
+      ans: 1,
+      exp: "모든 유압 전력 상실 시: 전기 작동 스태빌라이저 + 스포일러 2쌍으로 피치/롤 제어. 주/대체 피치 트림 스위치 및 조종륜 사용."
+    },
+    {
+      q: "Flap/Slat Secondary mode 자동 선택 조건이 아닌 것은?",
+      opts: [
+        "Center hydraulic system 고장",
+        "제어면 속도 정상 유압 속도의 80% 미만",
+        "Flap 또는 Slat 불일치 감지",
+        "Flap 또는 Slat 1차 제어 고장"
+      ],
+      ans: 1,
+      exp: "Secondary mode 자동 선택: Center 유압 고장 / 속도 50% 미만 / Flap·Slat 불일치 / 1차 제어 고장 / 선택 위치 이동 실패 / 비명령 운동 감지. '80%'가 아닌 '50%'입니다."
+    },
+    {
+      q: "Autodrag 기능 사용 가능 조건은?",
+      opts: [
+        "착륙 구성(Flaps 25 또는 30) + 스로틀 idle",
+        "Flaps UP + 스로틀 idle",
+        "어떤 플랩 위치든 스로틀 idle이면 가능",
+        "Flaps 20 이상 + V/S 모드"
+      ],
+      ans: 0,
+      exp: "Autodrag: 착륙 구성(Flaps 25/30) + 스로틀 idle. 500ft AGL 이하에서 점진적 제거. 자동/수동 접근 모두 활성."
+    },
+    {
+      q: "Flap Load Relief에서 수납(Retraction) 한계 위치는?",
+      opts: ["Flaps 1", "Flaps 5", "Flaps 10", "Flaps 15"],
+      ans: 1,
+      exp: "Flap 부하 경감: Flaps 5까지만 자동 수납. 속도 감소 시 자동 재전개."
+    },
+    {
+      q: "순항 중 플랩/슬랫 우발 전개 방지 억제 조건은?",
+      opts: [
+        "250 KIAS 초과 또는 약 10,000ft 초과",
+        "260 KIAS 초과 또는 약 15,000ft 초과",
+        "260 KIAS 초과 또는 약 20,000ft 초과",
+        "280 KIAS 초과 또는 약 22,000ft 초과"
+      ],
+      ans: 2,
+      exp: "UP 위치에서 플랩/슬랫 연장은 260 KIAS 초과 또는 약 20,000ft 초과 시 억제. Primary 및 Secondary 모드에서만 적용."
+    },
+    {
+      q: "STAB GREENBAND EICAS 메시지 레벨은?",
+      opts: ["Warning", "Caution", "Memo", "Advisory"],
+      ans: 3,
+      exp: "STAB GREENBAND는 Advisory 메시지. 계산된 그린 밴드와 압력 변환기 데이터 불일치 / 변환기 값 허용 오차 불일치 / 변환기 고장 시."
+    },
+    {
+      q: "EICAS에서 Flap Position Indication이 제거(removed)되는 조건은?",
+      opts: [
+        "플랩 수납 5초 후",
+        "슬랫 수납 10초 후",
+        "이륙 후(Airborne)",
+        "슬랫이 중간 위치로 이동할 때"
+      ],
+      ans: 1,
+      exp: "Flap position indication은 슬랫 수납 10초 후 제거됩니다."
+    },
+    {
+      q: "Spoiler가 자동 수납되고 Speedbrake 레버가 DOWN으로 구동되는 조건은?",
+      opts: [
+        "지상에서 한쪽 스로틀 이륙 추력 범위 이동 시",
+        "비행 중 역추력 레버 올림 시",
+        "지상에서 두 역추력 레버 Reverse idle 이동 시",
+        "착륙 후 두 스로틀 idle 이동 시"
+      ],
+      ans: 0,
+      exp: "스포일러 자동 수납 + 레버 DOWN: 지상에서 한쪽 스로틀 이륙 추력 범위 / 지상에서 공중 전환 / 비행 중 한쪽 스로틀 약 70% 이상."
+    }
+  ],
+
+  "10. Flight Instruments": [
+    {
+      q: "ANP ≥ RNP 시 Navigation Display에 나타나는 현상은?",
+      opts: [
+        "ANP 바가 사라짐",
+        "ANP 바가 Magenta로 변하고 10초간 깜박임",
+        "GPS 업데이트로 RNP 초과 없음",
+        "ANP 바가 중앙에서 만나고 황색, 편차 포인터 10초 깜박임, NAV UNABLE RNP 메시지"
+      ],
+      ans: 3,
+      exp: "ANP ≥ RNP: ANP 바가 스케일 중앙에서 만나고 황색 전환, 편차 포인터 10초 깜박임, NAV UNABLE RNP EICAS 메시지 표시."
+    },
+    {
+      q: "V2 속도가 상승 중 제거되는 조건이 아닌 것은?",
+      opts: [
+        "플랩 수납 시작",
+        "이륙(Lift-off) 시",
+        "10분간 플랩 레버 미이동",
+        "VREF 선택 후"
+      ],
+      ans: 1,
+      exp: "V1과 VR은 이륙(lift-off) 시 제거. V2는 플랩 수납 시작 / 10분 플랩 레버 미이동 / VREF 선택 후 제거됩니다."
+    },
+    {
+      q: "Grid Heading이 ND에 표시되는 시기는?",
+      opts: [
+        "북위/남위 80° 이상",
+        "북위/남위 75° 이상",
+        "북위/남위 70° 이상",
+        "북위/남위 65° 이상"
+      ],
+      ans: 2,
+      exp: "GRID 방위: 북위 70°N 이북 또는 남위 70°S 이남 시 두 ND 상단에 표시. 항공기 시스템에서는 사용되지 않습니다."
+    },
+    {
+      q: "AIRSPEED UNRELIABLE Memory Item – 첫 번째 조치는?",
+      opts: [
+        "FMS에서 백업 속도 선택",
+        "Autopilot disconnect 스위치 Push",
+        "A/T ARM 스위치 OFF",
+        "F/D 스위치 OFF"
+      ],
+      ans: 1,
+      exp: "Memory Item 순서: 1) Autopilot disconnect → 2) A/T ARM (both) OFF → 3) F/D (both) OFF → 4) 플랩 전개 10°/85% N1, 플랩 수납 4°/70% N1."
+    },
+    {
+      q: "Closed Loop Conditional Line Items가 Cyan으로 표시되는 경우는?",
+      opts: [
+        "조건이 True로 감지될 때",
+        "조건이 False로 감지될 때",
+        "조치 불필요, 완료됨",
+        "조치 필요, 미완료"
+      ],
+      ans: 1,
+      exp: "Cyan: 조건이 False로 감지됨 (해당 항목 아래 들여쓰기 항목도 비활성화 Cyan 표시). White: 불완전. Green: True 감지됨."
+    },
+    {
+      q: "HUD Declutter 모드의 장점이 아닌 것은?",
+      opts: [
+        "속도·고도 테이프 제거, 디지털 값만 표시",
+        "Partial compass rose 제거",
+        "Runway Edge Lines 표시 (300ft RA~60ft RA)",
+        "자동 착륙 정확도 향상"
+      ],
+      ans: 3,
+      exp: "Declutter 모드: 속도·고도 테이프 제거 / partial compass rose 제거 / Runway symbol 및 Edge Lines 표시 (300ft~60ft RA). 자동 착륙과는 무관합니다."
+    },
+    {
+      q: "NPS Deviation Pointer가 편차 한계에 걸렸을 때 심볼 형태는?",
+      opts: [
+        "채워진(filled) Magenta 삼각형",
+        "비어있는(unfilled) Magenta 삼각형",
+        "채워진(filled) 황색 삼각형",
+        "비어있는(unfilled) 황색 삼각형"
+      ],
+      ans: 1,
+      exp: "편차 한계에 걸렸을 때(parked at deflection limit): 비어있는(unfilled) Magenta 삼각형. 한계 미도달 시: 채워진(filled) Magenta 삼각형."
+    }
+  ],
+
+  "11. Flight Management": [
+    {
+      q: "IRS 실패 시 EICAS 메시지와 그 의미는?",
+      opts: [
+        "NAV IRU (Advisory) – IRU 고장, FMC GPS로 운항 가능",
+        "NAV INERTIAL SYS (Caution) – IRS 고장, LNAV/VNAV 불가",
+        "NAV INERTIAL SYS (Advisory) – IRS 고장, 모든 항법 불가",
+        "NAV IRU (Caution) – 두 IRU 모두 고장"
+      ],
+      ans: 1,
+      exp: "IRS 실패(AHRU+IRU 모두): NAV INERTIAL SYS Caution. GPS로 FMC 운항 가능하나 LNAV/VNAV 불가. SET HDG 주기적 동기화 필요. 두 IRU만 고장: NAV IRU Advisory."
+    },
+    {
+      q: "FMC CDU에서 N50° E020° 좌표 표시 형식은?",
+      opts: ["50N20E", "5020E", "N5020", "20E50"],
+      ans: 1,
+      exp: "입력 규칙: 경도 100° 미만이면 문자가 마지막. N50° E020° = 5020E. N50° W040° = 5040N. S52° W075° = 5275W. S06° E110° = 06S10."
+    },
+    {
+      q: "SGL SOURCE APPROACH EICAS 메시지의 의미는?",
+      opts: [
+        "GPS 단독 운항 중",
+        "기장과 부기장 디스플레이가 같은 ILS/GLS 소스 사용",
+        "ALTN NAV RADIO 활성화됨",
+        "ILS 신호 단일 주파수만 수신"
+      ],
+      ans: 1,
+      exp: "SGL SOURCE APPROACH: 두 조종사 디스플레이가 같은 ILS 또는 GLS 소스를 사용할 때."
+    },
+    {
+      q: "VNAV STEP CLIMB EICAS 메시지 표시 조건은?",
+      opts: [
+        "Step climb 지점 통과 후 3분 내 상승 미시작 + 고도 차이 2,000ft 초과",
+        "Step climb 지점 통과 후 5분 내 상승 미시작 + 고도 차이 3,500ft 초과",
+        "Step climb 지점 통과 후 10분 내 상승 미시작",
+        "CRZ ALT와 STEP TO 고도 차이 5,000ft 초과 시 항상"
+      ],
+      ans: 1,
+      exp: "Step climb 지점 통과 후 5분 내 상승 미시작 + CRZ ALT와 STEP TO 고도 차이 3,500ft 초과 시 VNAV STEP CLIMB Advisory."
+    },
+    {
+      q: "OPT(Optimum) 고도 계산에 사용되지 않는 요소는?",
+      opts: [
+        "총 중량(Gross Weight)",
+        "Cost Index",
+        "예측 바람 및 온도 편차",
+        "순항 CG"
+      ],
+      ans: 2,
+      exp: "OPT 고도 계산: 총 중량 / Cost Index / 순항 속도 스케줄 / 순항 CG. 예측 바람 및 온도 편차는 사용하지 않습니다."
+    },
+    {
+      q: "ATC 급상승 요청 시 따라야 할 속도는?",
+      opts: [
+        "VREF 30 + 100kt until M.82",
+        "VREF 30 + 120kt until M.82",
+        "VREF 30 + 140kt until M.82",
+        "VREF 30 + 160kt until M.82"
+      ],
+      ans: 2,
+      exp: "Maximum Rate Climb: VREF 30 + 140kt까지 M.82 인터셉트. Maximum Angle Climb: VREF 30 + 80kt."
+    }
+  ],
+
+  "12. Fuel": [
+    {
+      q: "Center Tank Pump이 Main Tank Pump보다 높은 출력 압력을 갖는 이유는?",
+      opts: [
+        "연료를 엔진까지 수직으로 들어올려야 하기 때문",
+        "연료를 더 먼 거리로 공급해야 하기 때문",
+        "Main Tank 연료보다 Center Tank 연료를 먼저 사용하기 위해",
+        "연료 방출(Jettison)을 위해"
+      ],
+      ans: 2,
+      exp: "Center tank 펌프 = Override/Jettison 펌프. 더 높은 출력 압력으로 Main tank 펌프를 override → Center tank 연료 우선 사용."
+    },
+    {
+      q: "Center Tank → Main Tank 자동 이송(Scavenge) 시작 조건은?",
+      opts: [
+        "메인 탱크 약 25,000lbs 미만 + Center pump OFF",
+        "메인 탱크 약 35,000lbs 미만 + Center pump OFF",
+        "Center tank 잔량 5,000lbs 미만",
+        "항상 자동 이송"
+      ],
+      ans: 1,
+      exp: "Main tank 펌프 ON 상태에서 어느 한 메인 탱크 약 35,000lbs 미만 + Center pump OFF 시 스캐빈지 자동 작동. 엔진 흡입 공급 중이면 억제."
+    },
+    {
+      q: "Fuel Jettison 완료 후 각 Main Tank 최소 잔량은?",
+      opts: ["6,000 lbs", "8,700 lbs", "10,000 lbs", "12,000 lbs"],
+      ans: 1,
+      exp: "연료 방출 완료 후 각 Main Tank 최소 8,700 lbs 잔류."
+    },
+    {
+      q: "Fuel Balance 자동 OFF 조건이 아닌 것은?",
+      opts: [
+        "연료 균형 완료",
+        "Jettison 시스템 활성화",
+        "FUEL IN CENTER 메시지 표시",
+        "지상에서 어느 한 엔진 작동"
+      ],
+      ans: 2,
+      exp: "Fuel Balance 자동 OFF: 연료 균형 / Jettison 활성화 / FUEL DISAGREE 메시지 / FUEL QTY LOW 메시지 / 지상 한 엔진 작동. 'FUEL IN CENTER'는 자동 OFF 조건이 아닙니다."
+    },
+    {
+      q: "Fuel Jettison – 지상에서 노즐이 열리지 않는 이유는?",
+      opts: [
+        "지상에서 밸브가 잠겨 있음",
+        "Nozzle은 스위치 위치에 관계없이 지상에서 열리지 않음",
+        "지상에서 시스템이 비활성화됨",
+        "APU 작동 중이어야 하기 때문"
+      ],
+      ans: 1,
+      exp: "연료 방출 노즐은 스위치 위치에 관계없이 지상에서는 열리지 않습니다. FUEL TO REMAIN 도달 시 자동 중지."
+    },
+    {
+      q: "Center Tank에 22,000lbs까지 연료 탑재 가능한 조건은?",
+      opts: [
+        "Main Tank가 최소 50% 이상 채워진 경우",
+        "Center tank 연료 + 실제 ZFW ≤ MZFW이고 CG 한계 준수 시",
+        "두 엔진 모두 작동 중인 경우",
+        "연료 온도가 -35°C 이상인 경우"
+      ],
+      ans: 1,
+      exp: "Main Tank가 가득 차지 않아도 Center tank에 최대 22,000lbs 탑재 가능 조건: Center tank 연료량 + 실제 ZFW ≤ MZFW, CG 한계 준수."
+    },
+    {
+      q: "FUEL DISAGREE Advisory 메시지가 표시되는 조건은?",
+      opts: [
+        "Center와 Main tank 연료 차이 발생 시",
+        "Center와 Main tank 연료 차이 1,500lbs 이상 시",
+        "Totalizer와 Calculated 연료 차이 발생 시",
+        "Totalizer와 Calculated 연료 차이 1,500lbs 이상 시"
+      ],
+      ans: 2,
+      exp: "FUEL DISAGREE: Totalizer와 Calculated 연료량 사이에 불일치 발생 시. 센터 탱크 누출 확인: 30분 이내 1,000lbs 이상 차이 증가 시 확인."
+    }
+  ],
+
+  "13. Hydraulics": [
+    {
+      q: "Center Hydraulic System을 가압하는 것은?",
+      opts: [
+        "엔진 구동 펌프 2개",
+        "전기 모터 구동 펌프(EMP) 2개 (C1, C2)",
+        "RAT 전용",
+        "APU 구동 펌프"
+      ],
+      ans: 1,
+      exp: "Center 유압: C1, C2 두 개의 EMP로 가압. 캘린더 날에 따라 주 펌프/수요 펌프 역할 교대."
+    },
+    {
+      q: "비행 중 RAT 자동 전개 조건이 아닌 것은?",
+      opts: [
+        "양쪽 엔진 모두 고장",
+        "Center 유압 시스템 압력만 낮음",
+        "기장·부기장 비행 계기 전체 전원 상실",
+        "4개 EMP 고장 + 비행 제어 결함 (접근 중)"
+      ],
+      ans: 1,
+      exp: "RAT 자동 전개: 양쪽 엔진 고장 / 세 유압 시스템 모두 압력 낮음 / 기장·부기장 계기 전체 전원 상실 / 4개 EMP 고장 + 비행 제어 결함(접근) / 4개 EMP 고장 + 이착륙 중 엔진 고장. 'Center만 낮음'이 아닌 '세 시스템 모두'입니다."
+    },
+    {
+      q: "L/R Hydraulic Demand Pump AUTO 작동 조건이 아닌 것은?",
+      opts: [
+        "시스템 저압",
+        "두 번째 엔진 시동 후 지상 첫 5분간",
+        "이륙 추력 설정~플랩 수납",
+        "역추력 작동"
+      ],
+      ans: 1,
+      exp: "L/R Demand Pump AUTO: 저압 / 두 번째 엔진 시동 후 지상 3분간 / 이륙 추력~플랩 수납 / 기어 DOWN 또는 RA 1,000ft 미만~지상 속도 40kt 미만 / 역추력. '첫 5분'이 아닌 '첫 3분'입니다."
+    },
+    {
+      q: "RAT 전개 시 유압 전원이 공급되는 시스템은?",
+      opts: ["Left", "Center", "Right", "Left + Right"],
+      ans: 1,
+      exp: "RAT: 전개 시 Center 유압 시스템에 연결된 주 비행 제어에 5,000 psi 유압 공급."
+    },
+    {
+      q: "Hydraulic 저장탱크 잔량 낮음(LO) 표시 색상은?",
+      opts: ["LO (white)", "QTY (white)", "QTY (amber)", "LO (amber)"],
+      ans: 3,
+      exp: "저장탱크 잔량 낮음: LO (amber). OF (white): 과충전. RF (white): 재충전 권장 (비행 중 억제)."
+    },
+    {
+      q: "Center Hydraulic System이 제공하는 것이 아닌 것은?",
+      opts: [
+        "비행 제어",
+        "착륙 장치 작동",
+        "엔진 역추력 장치",
+        "Nose gear 조향"
+      ],
+      ans: 2,
+      exp: "Center 유압: 비행 제어 / 착륙 장치 작동 / 앞전 슬랫 / Nose gear 조향 / 스포일러 / 후연 플랩. 엔진 역추력 장치는 Left/Right 유압 시스템이 담당합니다."
+    },
+    {
+      q: "Center Hydraulic System – 수요 펌프 작동 조건이 아닌 것은?",
+      opts: [
+        "시스템 저압",
+        "두 번째 엔진 시동 후 지상 첫 10분간",
+        "이륙 추력 설정~RA 2,000ft 초과",
+        "플랩 또는 슬랫 작동 중"
+      ],
+      ans: 1,
+      exp: "Center 수요 펌프 작동: 저압 / 두 번째 엔진 시동 후 지상 3분간 / 이륙 추력~RA 2,000ft 초과 / 플랩·슬랫 작동 중 / 기어 레버 DOWN + RA 2,000ft 미만~지상 속도 60kt 미만. '10분'이 아닌 '3분'입니다."
+    }
+  ],
+
+  "14. Landing Gear": [
+    {
+      q: "RTO Autobrake가 최대 제동 압력을 명령하는 조건은?",
+      opts: [
+        "지상 + 지상속도 65kt 이상 + 양 스로틀 idle",
+        "지상 + 지상속도 85kt 이상 + 양 스로틀 idle",
+        "지상 + 지상속도 90kt 이상 + 양 스로틀 idle",
+        "지상 + 지상속도 80kt 이상 + 양 스로틀 idle"
+      ],
+      ans: 1,
+      exp: "RTO: 지상 + 지상속도 85kt 초과 + 양 스로틀 idle. 85kt 이하에서 RTO 시작 시 RTO autobrake 미작동."
+    },
+    {
+      q: "착륙 후 Autobrake 시작 조건은?",
+      opts: [
+        "메인 기어 착지 즉시",
+        "양 스로틀 idle + 바퀴 스핀업",
+        "역추력 레버 올림 즉시",
+        "스피드브레이크 전개 즉시"
+      ],
+      ans: 1,
+      exp: "착륙 Autobrake: 양 스로틀 idle + 바퀴 스핀업. 메인 기어 착지 직후 약간 뒤에 시작."
+    },
+    {
+      q: "Autobrake 해제 조건이 아닌 것은?",
+      opts: [
+        "페달 브레이킹 적용",
+        "착륙 후 한쪽 스로틀 전진",
+        "AUTOPILOT 결함",
+        "Normal Antiskid 결함"
+      ],
+      ans: 2,
+      exp: "Autobrake 해제: 페달 브레이킹 / 착륙 후 스로틀 전진 / 스피드브레이크 레버 DOWN / DISARM 또는 OFF / Autobrake 결함 / Antiskid 결함 / IRU 관성 데이터 손실. 'AUTOPILOT 결함'은 해제 조건이 아닙니다."
+    },
+    {
+      q: "랜딩 기어 수납 후 UP 위치 유지는?",
+      opts: ["Over-center struts", "Uplocks", "잠긴 도어 구조", "유압 압력"],
+      ans: 1,
+      exp: "수납 후 기어는 Uplocks로 UP 위치 유지. 이륙 1초 후 메인 기어 도어가 사전 개방(early doors 기능)."
+    },
+    {
+      q: "GEAR DISAGREE 주의 메시지 표시 조건은?",
+      opts: [
+        "기어 레버가 DOWN이 아닐 때",
+        "정상 이동 시간 후 기어가 잠기지 않았을 때",
+        "기어 도어가 닫히지 않았을 때",
+        "Nose gear 조향 미작동 시"
+      ],
+      ans: 1,
+      exp: "GEAR DISAGREE: 정상 이동 시간 후 기어가 UP 또는 DOWN 잠금 상태가 아닐 때. GEAR DOOR: 정상 이동 시간 후 도어가 닫히지 않았을 때."
+    },
+    {
+      q: "Parking Brake 'Park and Adjust' 기능이란?",
+      opts: [
+        "브레이크 온도를 자동으로 측정하는 시스템",
+        "파킹 브레이크 적용 후 냉각 중 클램핑 힘을 모니터링 및 조절하는 기능",
+        "브레이크 패드 마모를 자동으로 보상하는 시스템",
+        "착륙 후 자동으로 파킹 브레이크를 적용하는 기능"
+      ],
+      ans: 1,
+      exp: "Park and Adjust: 파킹 브레이크 적용 후 브레이크 상태를 모니터링하고 냉각 중 필요에 따라 클램핑 힘을 조절합니다."
+    },
+    {
+      q: "착륙 구성 경고 CONFIG GEAR – 경고음을 침묵시킬 수 없는 경우는?",
+      opts: [
+        "기어 미내림, 스로틀 idle, RA 800ft 미만",
+        "플랩 착륙 위치 + 기어 미내림 (siren 침묵 불가)",
+        "양쪽 모두 침묵 가능",
+        "항상 침묵 가능"
+      ],
+      ans: 1,
+      exp: "FLAP 레버가 착륙 위치이고 기어 미내림인 경우: Master WARNING/CAUTION Reset으로 사이렌을 침묵시킬 수 없고 메시지는 기어 잠금 또는 GEAR OVRD 선택까지 유지됩니다."
+    }
+  ],
+
+  "15. Warning Systems": [
+    {
+      q: "Master WARNING/CAUTION Reset으로 음 차단 가능한 메시지가 아닌 것은?",
+      opts: [
+        "CABIN ALTITUDE",
+        "FIRE",
+        "STABILIZER",
+        "OVERSPEED"
+      ],
+      ans: 3,
+      exp: "음 차단 가능: CABIN ALTITUDE / CONFIG GEAR (특정 조건) / FIRE / PILOT RESPONSE / STABILIZER / EVAC COMMAND. OVERSPEED는 차단 불가."
+    },
+    {
+      q: "이륙 구성 경고 함수 Armed 조건은?",
+      opts: [
+        "지상 + 양 엔진 이륙 추력 + V1 미만",
+        "지상 + FUEL CONTROL RUN + 한쪽 엔진 이륙 추력 + V1 미만",
+        "지상 + FUEL CONTROL RUN + 양 엔진 이륙 추력",
+        "역추력 잠금 + 지상속도 0"
+      ],
+      ans: 1,
+      exp: "이륙 구성 경고 Armed: 지상 + FUEL CONTROL RUN + 한쪽 엔진 이륙 추력 범위 + V1 미만. V1에서 경고 억제 (CONFIG RUDDER는 30kt 초과 시)."
+    },
+    {
+      q: "SPEEDBRAKE EXTENDED 주의 메시지 표시 조건은?",
+      opts: [
+        "지상속도 85kt 초과 + 스피드브레이크 레버 35° 미만",
+        "RA 15ft 이상 + 스피드브레이크 레버 ARMED 초과 + (RA 800ft 이하 또는 착륙 플랩 또는 스로틀 idle 5° 초과 15초)",
+        "RA 1,000ft 이하 + 스피드브레이크 레버 전개",
+        "착지 후 스피드브레이크 미자동 전개"
+      ],
+      ans: 1,
+      exp: "SPEEDBRAKE EXTENDED: RA ≥15ft + 레버 ARMED 초과 + (RA ≤800ft / 또는 착륙 플랩 / 또는 스로틀 idle 5° 초과 15초) 중 하나."
+    },
+    {
+      q: "Time Critical Warning이 아닌 것은?",
+      opts: ["ENG FAIL", "PULL UP", "SPEEDBRAKE", "GLIDESLOPE"],
+      ans: 3,
+      exp: "Time Critical Warning (PFD 표시): ENG FAIL (red) / PULL UP (red) / SPEEDBRAKE (red) / WINDSHEAR (red). GLIDESLOPE는 해당 없음."
+    },
+    {
+      q: "EICAS Warning 메시지(Red) 취소 방법은?",
+      opts: [
+        "CANC/RCL 스위치 Push",
+        "취소 불가",
+        "Master WARNING 스위치 Push",
+        "해당 시스템 차단"
+      ],
+      ans: 1,
+      exp: "Warning 메시지(Red)는 CANC/RCL로 취소할 수 없습니다. Caution 메시지(Amber)는 CANC/RCL로 취소/재호출 가능."
+    },
+    {
+      q: "이륙 구성 경고 CONFIG RUDDER가 억제되는 속도는?",
+      opts: [
+        "V1 이상",
+        "30노트 초과",
+        "80노트 초과",
+        "60노트 초과"
+      ],
+      ans: 1,
+      exp: "이륙 구성 경고는 V1에서 억제됩니다. 단, CONFIG RUDDER는 30노트 초과 시 별도로 억제됩니다."
+    },
+    {
+      q: "EICAS Status 메시지의 의미는?",
+      opts: [
+        "비정상 상태에 대한 주요 경보 수단",
+        "운항 파견 능력에 영향을 줄 수 있는 장비 결함",
+        "정상 상태에 대한 승무원 메모",
+        "통신 상태 및 메시지 안내"
+      ],
+      ans: 1,
+      exp: "EICAS 메시지 종류: Alert(비정상 경보) / Communication(통신 안내) / Memo(정상 상태 메모) / Status(파견 능력 영향 장비 결함)."
+    }
+  ]
+};
+
+let currentSystem = null;
+
+function buildNav() {
+  const nav = document.getElementById('sysNav');
+  Object.keys(ALL_QUESTIONS).forEach(sys => {
+    const btn = document.createElement('button');
+    btn.className = 'sys-btn';
+    btn.textContent = sys;
+    btn.onclick = () => selectSystem(sys, btn);
+    nav.appendChild(btn);
+  });
+}
+
+function selectSystem(sys, btn) {
+  currentSystem = sys;
+  document.querySelectorAll('.sys-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAll(sys);
+}
+
+function renderAll(sys) {
+  const qs = ALL_QUESTIONS[sys];
+  const area = document.getElementById('mainArea');
+
+  let html = `<div class="sys-title">✈️ ${sys} <span class="count">— 총 ${qs.length}문제</span></div>`;
+
+  qs.forEach((q, qi) => {
+    const labels = ['A', 'B', 'C', 'D'];
+    let optsHtml = q.opts.map((opt, oi) => `
+      <button class="opt-btn" onclick="answer(${qi}, ${oi})" id="opt-${qi}-${oi}">
+        <span class="opt-label">${labels[oi]}</span>
+        <span>${opt}</span>
+      </button>
+    `).join('');
+
+    html += `
+      <div class="question-card" id="card-${qi}">
+        <div class="q-header">
+          <span class="q-num-badge">Q${qi + 1}</span>
+        </div>
+        <div class="q-text">${q.q}</div>
+        <div class="options" id="opts-${qi}">${optsHtml}</div>
+        <div class="feedback" id="fb-${qi}">
+          <strong>✅ 정답!</strong>
+          ${q.exp ? `<div class="exp-text">📖 ${q.exp}</div>` : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  area.innerHTML = html;
+}
+
+function answer(qi, oi) {
+  const q = ALL_QUESTIONS[currentSystem][qi];
+  const optsEl = document.getElementById(`opts-${qi}`);
+  const fbEl = document.getElementById(`fb-${qi}`);
+
+  // Already answered?
+  if (optsEl.dataset.answered) return;
+
+  if (oi === q.ans) {
+    // Correct
+    optsEl.dataset.answered = '1';
+    const btn = document.getElementById(`opt-${qi}-${oi}`);
+    btn.classList.add('correct');
+    btn.disabled = true;
+    // Disable others
+    q.opts.forEach((_, i) => {
+      const b = document.getElementById(`opt-${qi}-${i}`);
+      if (i !== oi) b.disabled = true;
+    });
+    fbEl.classList.add('show');
+  } else {
+    // Wrong – just highlight this button as wrong, allow retry
+    const btn = document.getElementById(`opt-${qi}-${oi}`);
+    btn.classList.add('wrong');
+    btn.disabled = true;
+  }
+}
+
+buildNav();
+</script>
+</body>
+</html>
