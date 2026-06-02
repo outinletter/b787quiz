@@ -14,6 +14,13 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f7fc;color:#1e2a45;min-heig
 .header-title{font-size:15px;font-weight:700;color:#2a4ab0;letter-spacing:.3px}
 .header-sub{font-size:11px;color:#8899bb;margin-top:1px}
 .header-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* ── TEXT SIZE CONTROLLER ── */
+.size-control{display:flex;align-items:center;background:#f0f4ff;border:1px solid #d0dcf8;border-radius:8px;padding:2px}
+.size-btn{background:none;border:none;color:#4a7aee;font-size:12px;font-weight:700;padding:5px 10px;cursor:pointer;border-radius:6px;transition:all .15s}
+.size-btn:hover{background:#e0eafc}
+.size-btn:active{background:#ccdcf8}
+
 .rand-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:none;background:#4a7aee;color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
 .rand-btn:hover{background:#3a6add}
 .rand-chip{display:flex;align-items:center;gap:6px;background:#f0f4ff;border:1px solid #d0dcf8;border-radius:8px;padding:5px 10px;font-size:12px;color:#5570cc}
@@ -61,13 +68,18 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f7fc;color:#1e2a45;min-heig
 .q-type-tag.fc{background:#e8f8f0;color:#2a7a50}
 .sys-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:#f0f2f8;color:#7080aa}
 .answered-badge{margin-left:auto;font-size:10px;font-weight:700;color:#4aae7a;display:flex;align-items:center;gap:4px}
-.q-text{font-size:14px;line-height:1.75;color:#1e2a45;font-weight:500}
+
+/* 가변 텍스트 크기 기준 (기본 변수 선언) */
+:root {
+  --quiz-font-size: 14px;
+}
+.q-text{font-size:var(--quiz-font-size);line-height:1.75;color:#1e2a45;font-weight:500}
 
 /* ── OPTIONS ── */
 .options{display:flex;flex-direction:column;gap:7px;margin-top:14px}
-.opt-btn{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;background:#f8faff;border:1px solid #e4ecf8;border-radius:8px;color:#3a4a70;cursor:pointer;font-size:13px;text-align:left;transition:all .15s;line-height:1.5;width:100%}
+.opt-btn{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;background:#f8faff;border:1px solid #e4ecf8;border-radius:8px;color:#3a4a70;cursor:pointer;font-size:calc(var(--quiz-font-size) - 1px);text-align:left;transition:all .15s;line-height:1.5;width:100%}
 .opt-btn:hover:not(:disabled){background:#eef3ff;border-color:#9ab8ee}
-.opt-lbl{font-weight:700;color:#a0b8e0;min-width:16px;flex-shrink:0;font-size:12px;margin-top:1px}
+.opt-lbl{font-weight:700;color:#a0b8e0;min-width:16px;flex-shrink:0;font-size:calc(var(--quiz-font-size) - 2px);margin-top:1px}
 .opt-btn:hover:not(:disabled) .opt-lbl{color:#4a7aee}
 .opt-btn.correct{background:#edfaf4;border-color:#5ecb8a;color:#1a5a30}
 .opt-btn.correct .opt-lbl{color:#4aae6a}
@@ -78,18 +90,18 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f7fc;color:#1e2a45;min-heig
 .wrong-icon{margin-left:auto;color:#f0a0a0;font-weight:700;font-size:13px;flex-shrink:0}
 
 /* ── FEEDBACK ── */
-.feedback{display:none;margin-top:12px;padding:12px 14px;border-radius:8px;background:#edfaf4;border-left:3px solid #4aae7a;font-size:13px;line-height:1.65;color:#1a5a30}
+.feedback{display:none;margin-top:12px;padding:12px 14px;border-radius:8px;background:#edfaf4;border-left:3px solid #4aae7a;font-size:calc(var(--quiz-font-size) - 1px);line-height:1.65;color:#1a5a30}
 .feedback.show{display:block}
-.feedback .exp{color:#2a6a44;margin-top:5px;font-size:12px}
+.feedback .exp{color:#2a6a44;margin-top:5px;font-size:calc(var(--quiz-font-size) - 2px)}
 
 /* ── FLASHCARD ── */
 .fc-body{margin-top:14px}
-.fc-reveal-btn{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:8px;border:1.5px solid #a0ddb8;background:#f4fbf7;color:#2a7a50;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;width:100%}
+.fc-reveal-btn{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:8px;border:1.5px solid #a0ddb8;background:#f4fbf7;color:#2a7a50;font-size:calc(var(--quiz-font-size) - 1px);font-weight:600;cursor:pointer;transition:all .15s;width:100%}
 .fc-reveal-btn:hover{background:#e8f8ee;border-color:#6acc9a}
 .fc-reveal-btn.revealed{background:#edfaf4;border-color:#4aae7a;color:#1a5a30}
 .fc-reveal-btn .btn-icon{font-size:14px;transition:transform .2s}
 .fc-reveal-btn.revealed .btn-icon{transform:rotate(180deg)}
-.fc-answer{display:none;margin-top:10px;padding:14px 16px;background:#f2fbf6;border:1px solid #b8e8cc;border-radius:8px;font-size:13px;line-height:1.85;color:#1a4a30;white-space:pre-wrap}
+.fc-answer{display:none;margin-top:10px;padding:14px 16px;background:#f2fbf6;border:1px solid #b8e8cc;border-radius:8px;font-size:calc(var(--quiz-font-size) - 1px);line-height:1.85;color:#1a4a30;white-space:pre-wrap}
 .fc-answer.show{display:block}
 
 /* ── EMPTY ── */
@@ -111,9 +123,9 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f7fc;color:#1e2a45;min-heig
   .header-sub{display:none}
   .rand-btn span{display:none}
   .rand-chip .label{display:none}
+  .size-btn{padding:4px 7px;font-size:11px}
   .main{padding:14px 10px 60px}
   .q-card{padding:16px}
-  .q-text{font-size:13px}
 }
 </style>
 </head>
@@ -126,6 +138,10 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f7fc;color:#1e2a45;min-heig
     <div class="header-sub">Type Rating Study</div>
   </div>
   <div class="header-right">
+    <div class="size-control">
+      <button class="size-btn" onclick="changeFontSize(-1)" title="글자 작게">A-</button>
+      <button class="size-btn" onclick="changeFontSize(1)" title="글자 크게">A+</button>
+    </div>
     <button class="rand-btn" onclick="startRandom()">
       🎲 <span>랜덤 20문제</span>
     </button>
@@ -173,7 +189,7 @@ const FLASHCARD_QUESTIONS = {
     { q:"Cargo Compartment 소화 시스템의 비행 중과 지상 작동 순서를 설명하시오.", ans:`비행 중 화재 경보 발생 시:\n① 즉시 소화기 병 2개 전량 방출\n② 15분 지연 후 나머지 병들 저유량으로 방출\n③ 15분 이내 착륙 시: 착륙 시 나머지 중 1개 저유량 방출\n\n지상 CARGO FIRE DISCHARGE 스위치 누름 시:\n① 소화기 병 3개 동시 방출 (3번째는 저유량)\n\nEICAS: BOTTLE DISCH CARGO Advisory → 처음 2개 병 방출 시작 시 표시` }
   ],
   "PC/PT · CAT II/III": [
-    { q:"CAT III 접근 중 PF와 PM의 주요 임무는?", ans:`• PF: 감시(Supervising) 및 의사 결정(Decision Making)\n• PM: 자동 시스템 작동 모니터링(Monitoring operation of automatic system)` },
+    { q:"CAT III 접근 중 PF와 PM의 주요 임무는?", ans:`• PF: 감시(Supervising) 및 의사 결정(Decision Making)\n• PM: 자동 시스템 작동 모니럼(Monitoring operation of automatic system)` },
     { q:"Autoland에 필요한 ILS 기상 장비 목록은 어디서 확인하는가?", ans:`POM (Pilot Operating Manual)` },
     { q:"저시정 운항 이륙/접근 및 착륙 최저치는 어디서 확인하는가?", ans:`FOM (Flight Operations Manual)` },
     { q:"CAT III 접근이 허용되는 최소 제동력(Braking Action)은?", ans:`활주로 모든 구간에서 최소 Medium 이상` },
@@ -350,7 +366,7 @@ const ALL_QUESTIONS = {
     {q:"Autobrake 해제 조건이 아닌 것은?",opts:["페달 브레이킹 적용","착륙 후 한쪽 스로틀 전진","AUTOPILOT 결함","Normal Antiskid 결함"],ans:2,exp:"Autobrake 해제: 페달 브레이킹 / 착륙 후 스로틀 전진 / 스피드브레이크 레버 DOWN / DISARM 또는 OFF / Autobrake 결함 / Antiskid 결함 / IRU 관성 데이터 손실. 'AUTOPILOT 결함'은 해당 없음."},
     {q:"랜딩 기어 수납 후 UP 위치 유지는?",opts:["Over-center struts","Uplocks","잠긴 도어 구조","유압 압력"],ans:1,exp:"수납 후 기어는 Uplocks로 UP 위치 유지."},
     {q:"GEAR DISAGREE 주의 메시지 표시 조건은?",opts:["기어 레버가 DOWN이 아닐 때","정상 이동 시간 후 기어가 잠기지 않았을 때","기어 도어가 닫히지 않았을 때","Nose gear 조향 미작동 시"],ans:1,exp:"GEAR DISAGREE: 정상 이동 시간 후 기어가 UP 또는 DOWN 잠금 상태가 아닐 때."},
-    {q:"Parking Brake 'Park and Adjust' 기능은?",opts:["브레이크 온도를 자동으로 측정하는 시스템","파킹 브레이크 적용 후 냉각 중 클램핑 힘을 모니터링 및 조절","브레이크 패드 마모를 자동으로 보상","착륙 후 자동으로 파킹 브레이크 적용"],ans:1,exp:"Park and Adjust: 파킹 브레이크 적용 후 브레이크 상태를 모니터링하고 냉각 중 클램핑 힘을 조절."},
+    {q:"Parking Brake 'Park and Adjust' 기능은?",opts:["브레이크 온도를 자동으로 측정하는 시스템","파킹 브레이크 적용 후 냉각 중 클램핑 힘을 모니터링 및 조절","브레이크 패드 마마를 자동으로 보상","착륙 후 자동으로 파킹 브레이크 적용"],ans:1,exp:"Park and Adjust: 파킹 브레이크 적용 후 브레이크 상태를 모니터링하고 냉각 중 클램핑 힘을 조절."},
     {q:"CONFIG GEAR 경고음을 침묵시킬 수 없는 경우는?",opts:["기어 미내림 + 스로틀 idle + RA 800ft 미만","플랩 착륙 위치 + 기어 미내림","양쪽 모두 침묵 가능","항상 침묵 가능"],ans:1,exp:"플랩이 착륙 위치이고 기어 미내림: Master WARNING/CAUTION Reset으로 사이렌 침묵 불가. 기어 잠금 또는 GEAR OVRD 선택까지 유지."}
   ],
   "15. Warning Systems": [
@@ -366,6 +382,15 @@ const ALL_QUESTIONS = {
 
 let usedRandomKeys = new Set();
 let currentQs = [];
+let currentFontSize = 14; // 기본 폰트 사이즈 저장 변수
+
+// 텍스트 크기 변경 함수
+function changeFontSize(direction) {
+  currentFontSize += direction;
+  if(currentFontSize < 11) currentFontSize = 11; // 최소 크기 제한
+  if(currentFontSize > 24) currentFontSize = 24; // 최대 크기 제한
+  document.documentElement.style.setProperty('--quiz-font-size', currentFontSize + 'px');
+}
 
 function getTotalCount() {
   const mcq = Object.values(ALL_QUESTIONS).reduce((s,qs)=>s+qs.length,0);
