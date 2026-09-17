@@ -43,6 +43,11 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f7fc;color:#1e2a45;min-heig
 
 /* ── MAIN ── */
 .main{max-width:740px;margin:0 auto;padding:20px 16px 60px}
+.main{padding-bottom:96px}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:120;display:flex;gap:10px;justify-content:center;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid #dfe7f5;box-shadow:0 -4px 16px rgba(60,90,140,.12);backdrop-filter:blur(8px)}
+.bottom-nav button{width:min(340px,45vw);padding:12px 18px;border:1px solid #cdd9ef;border-radius:10px;background:#fff;color:#49628f;font-size:14px;font-weight:700;cursor:pointer}
+.bottom-nav button.primary{background:#4a7aee;border-color:#4a7aee;color:#fff}
+.bottom-nav button:disabled{opacity:.4;cursor:default}
 
 /* ── SYSTEM HEADER ── */
 .sys-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid #e0e8f8}
@@ -382,6 +387,9 @@ const ALL_QUESTIONS = {
 
 let usedRandomKeys = new Set();
 let currentQs = [];
+let currentIndex = 0;
+let currentTitle = '';
+let currentShowTag = false;
 let currentFontSize = 14; // 기본 폰트 사이즈 저장 변수
 
 // 텍스트 크기 변경 함수
@@ -482,6 +490,16 @@ function buildNav() {
 
 function render(qs, title, showTag) {
   currentQs = qs;
+  currentIndex = 0;
+  currentTitle = title;
+  currentShowTag = showTag;
+  renderCurrentCard();
+}
+
+function renderCurrentCard() {
+  const qs = currentQs;
+  const title = currentTitle;
+  const showTag = currentShowTag;
   const tot = qs.length;
   const mcqCount = qs.filter(q=>q._type==='mcq').length;
   const fcCount = qs.filter(q=>q._type==='fc').length;
@@ -502,7 +520,9 @@ function render(qs, title, showTag) {
     </div>
   `;
 
-  qs.forEach((q,qi) => {
+  const qi = currentIndex;
+  const q = qs[qi];
+  if (q) {
     const labels = ['A','B','C','D'];
     const typeTag = q._type==='fc'
       ? `<span class="q-type-tag fc">Flashcard</span>`
@@ -536,10 +556,24 @@ function render(qs, title, showTag) {
           </div>
         </div>`;
     }
-  });
+  }
+
+  html += `
+    <div class="bottom-nav">
+      <button onclick="goToQuestion(-1)" ${currentIndex === 0 ? 'disabled' : ''}>← 이전</button>
+      <button class="primary" onclick="goToQuestion(1)" ${currentIndex >= tot - 1 ? 'disabled' : ''}>다음 →</button>
+    </div>`;
 
   document.getElementById('mainArea').innerHTML = html;
   document.getElementById('mainArea')._answered = 0;
+}
+
+function goToQuestion(direction) {
+  const nextIndex = currentIndex + direction;
+  if (nextIndex < 0 || nextIndex >= currentQs.length) return;
+  currentIndex = nextIndex;
+  renderCurrentCard();
+  window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
 function toggleFC(qi) {
